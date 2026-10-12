@@ -77,8 +77,12 @@ public class AssertTest {
 
         List<LogEntry> matchingLog = TestsUtils.awaitLogs(logs, 2);
 
-        assertThat(matchingLog.stream().filter(logEntry -> logEntry.getMessage().contains("inputs.key == 'value1'")).count()).isEqualTo(1L);
-        assertThat(matchingLog.stream().filter(logEntry -> logEntry.getMessage().contains("inputs.key == 'value2'")).count()).isEqualTo(1L);
+        assertThat(matchingLog)
+            .extracting(LogEntry::getMessage)
+            .contains(
+                "Assertion `{{ inputs.key == 'value1' }}` failed: rendered to `false`.",
+                "Assertion `{{ inputs.key == 'value2' }}` failed: rendered to `false`."
+            );
 
         assertThat(runContext.metrics().stream().filter(e -> e.getName().equals("success")).findFirst().orElseThrow().getValue()).isEqualTo(3d);
         assertThat(runContext.metrics().stream().filter(e -> e.getName().equals("failed")).findFirst().orElseThrow().getValue()).isEqualTo(2d);
